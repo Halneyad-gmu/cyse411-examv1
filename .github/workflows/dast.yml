@@ -1,0 +1,32 @@
+# .github/workflows/dast.yml
+name: DAST - OWASP ZAP
+on:
+  workflow_dispatch: # Manual trigger for comprehensive scanning
+
+jobs:
+  zap_scan:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Start Vulnerable Server
+        run: |
+          npm start &
+          sleep 15 # Wait for server to boot on port 3001
+
+      - name: Run OWASP ZAP Full Scan
+        uses: zaproxy/action-full-scan@v0.12.0
+        with:
+          target: "http://localhost:3001"
+          fail_action: true
+          allow_issue_writing: false
